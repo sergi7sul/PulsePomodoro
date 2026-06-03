@@ -1,5 +1,6 @@
 package com.cherrytime.data.repository
 
+import com.cherrytime.data.db.session.DaySessionSummary
 import com.cherrytime.data.db.session.SessionDao
 import com.cherrytime.data.db.session.toDomain
 import com.cherrytime.data.db.session.toEntity
@@ -27,4 +28,7 @@ class TimerRepositoryImpl @Inject constructor(
 
     override fun getTotalCompletedWorkSessions(): Flow<Int> =
         sessionDao.getTotalCompletedWorkSessions()
+
+    override fun getWorkSummaryByDay(fromMs: Long): Flow<List<DaySessionSummary>> =
+        sessionDao.getWorkSummaryByDay(fromMs)
 }

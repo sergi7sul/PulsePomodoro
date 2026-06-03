@@ -28,4 +28,16 @@ interface SessionDao {
           AND startedAt >= :dayStartMs AND startedAt < :dayEndMs
     """)
     suspend fun countCompletedWorkSessionsForDay(dayStartMs: Long, dayEndMs: Long): Int
+
+    @Query("""
+        SELECT (startedAt / 86400000) AS epochDay,
+               SUM(durationMs / 60000) AS focusMinutes,
+               COUNT(*) AS sessionCount
+        FROM sessions
+        WHERE phase = 'WORK' AND completedAt IS NOT NULL
+          AND startedAt >= :fromMs
+        GROUP BY epochDay
+        ORDER BY epochDay ASC
+    """)
+    fun getWorkSummaryByDay(fromMs: Long): Flow<List<DaySessionSummary>>
 }
