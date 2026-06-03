@@ -23,8 +23,11 @@
 
     <!-- Notifications -->
     <string name="notification_channel_timer">Timer</string>
+    <string name="notification_channel_timer_desc">Shows remaining time for the active Pomodoro session</string>
     <string name="notification_channel_break">Break Alerts</string>
     <string name="notification_channel_reminders">Wellness Reminders</string>
+    <string name="notification_channel_reminders_desc">Reminds you to start your next session or take a break</string>
+    <string name="service_timer_description">Keeps the Pomodoro timer running while you work</string>
     <string name="notification_timer_title">CherryTime</string>
     <string name="notification_break_title">Time for a break!</string>
     <string name="notification_water_title">Hydration reminder</string>
