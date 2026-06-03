@@ -1,7 +1,19 @@
 package com.cherrytime.feature.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +43,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.preferences.collectAsStateWithLifecycle()
+    val geminiState by viewModel.geminiKeyState.collectAsStateWithLifecycle()
     SettingsContent(
         prefs = prefs,
         onWorkDuration = viewModel::setWorkDuration,
@@ -43,6 +56,9 @@ fun SettingsScreen(
         onWaterInterval = viewModel::setWaterReminderInterval,
         onPostureEnabled = viewModel::setPostureReminderEnabled,
         onPostureInterval = viewModel::setPostureReminderInterval,
+        geminiState = geminiState,
+        onSaveGeminiKey = viewModel::saveGeminiKey,
+        onClearGeminiKey = viewModel::clearGeminiKey,
     )
 }
 
@@ -59,6 +75,9 @@ private fun SettingsContent(
     onWaterInterval: (Int) -> Unit = {},
     onPostureEnabled: (Boolean) -> Unit = {},
     onPostureInterval: (Int) -> Unit = {},
+    geminiState: GeminiKeyState = GeminiKeyState(),
+    onSaveGeminiKey: (String) -> Unit = {},
+    onClearGeminiKey: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -158,6 +177,70 @@ private fun SettingsContent(
                 unit = "min",
                 onValueChange = onPostureInterval,
             )
+        }
+
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        SectionTitle(stringResource(R.string.settings_gemini_key))
+
+        GeminiKeySection(
+            state = geminiState,
+            onSave = onSaveGeminiKey,
+            onClear = onClearGeminiKey,
+        )
+
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun GeminiKeySection(
+    state: GeminiKeyState,
+    onSave: (String) -> Unit,
+    onClear: () -> Unit,
+) {
+    var keyInput by remember { mutableStateOf("") }
+
+    if (state.hasKey) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "API key saved",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            OutlinedButton(onClick = onClear) { Text("Clear") }
+        }
+    } else {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = keyInput,
+                onValueChange = { keyInput = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.settings_gemini_key_hint)) },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                isError = state.error != null,
+                supportingText = state.error?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { if (keyInput.isNotBlank()) onSave(keyInput) },
+                enabled = keyInput.isNotBlank() && !state.isValidating,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (state.isValidating) {
+                    CircularProgressIndicator()
+                } else {
+                    Text("Save & Validate")
+                }
+            }
         }
     }
 }

@@ -110,6 +110,9 @@ dependencies {
     // Coroutines
     implementation(libs.coroutines.android)
 
+    // Security
+    implementation(libs.androidx.security.crypto)
+
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
