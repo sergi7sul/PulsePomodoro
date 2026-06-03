@@ -21,6 +21,8 @@ class NotificationHelper @Inject constructor(
         const val CHANNEL_REMINDER = "cherrytime_reminder"
         const val NOTIFICATION_ID_TIMER = 1
         const val NOTIFICATION_ID_REMINDER = 2
+        const val NOTIFICATION_ID_WATER = 3
+        const val NOTIFICATION_ID_POSTURE = 4
     }
 
     fun createChannels() {
