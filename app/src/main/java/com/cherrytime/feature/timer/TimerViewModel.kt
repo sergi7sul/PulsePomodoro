@@ -14,6 +14,7 @@ import com.cherrytime.domain.model.Phase
 import com.cherrytime.domain.model.PomodoroSession
 import com.cherrytime.domain.model.TimerState
 import com.cherrytime.domain.repository.TimerRepository
+import com.cherrytime.domain.usecase.GetCoachingTipUseCase
 import com.cherrytime.domain.usecase.GetContextualQuoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,6 +32,7 @@ class TimerViewModel @Inject constructor(
     preferencesRepository: UserPreferencesRepository,
     private val timerRepository: TimerRepository,
     private val getContextualQuote: GetContextualQuoteUseCase,
+    private val getCoachingTip: GetCoachingTipUseCase,
 ) : ViewModel() {
 
     private var serviceBound = false
@@ -135,7 +137,7 @@ class TimerViewModel @Inject constructor(
         if (phase == lastQuotePhase) return
         lastQuotePhase = phase
         viewModelScope.launch {
-            val quote = getContextualQuote(phase)
+            val quote = getCoachingTip(phase) ?: getContextualQuote(phase)
             _uiState.value = _uiState.value.copy(currentQuote = quote)
         }
     }
