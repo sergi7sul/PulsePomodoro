@@ -16,7 +16,7 @@ datastore               = "1.2.1"
 workmanager             = "2.11.2"
 
 camerax                 = "1.6.1"
-mediapipe               = "0.20230731"
+mediapipe               = "0.10.14"
 coroutines              = "1.11.0"
 
 junit                   = "4.13.2"
