@@ -11,7 +11,9 @@ import com.cherrytime.data.datastore.UserPreferences
 import com.cherrytime.data.datastore.UserPreferencesRepository
 import com.cherrytime.data.service.TimerService
 import com.cherrytime.domain.model.Phase
+import com.cherrytime.domain.model.PomodoroSession
 import com.cherrytime.domain.model.TimerState
+import com.cherrytime.domain.repository.TimerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +28,11 @@ import javax.inject.Inject
 class TimerViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     preferencesRepository: UserPreferencesRepository,
+    private val timerRepository: TimerRepository,
 ) : ViewModel() {
 
     private var serviceBound = false
+    private var sessionStartedAt: Long = 0L
 
     private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState.asStateFlow()
@@ -67,6 +71,7 @@ class TimerViewModel @Inject constructor(
             TimerIntent.Start -> {
                 val phase = _uiState.value.nextPhase
                 val durationMs = preferences.value.durationMs(phase)
+                sessionStartedAt = System.currentTimeMillis()
                 svcIntent.action = TimerService.ACTION_START
                 svcIntent.putExtra(TimerService.EXTRA_PHASE, phase.name)
                 svcIntent.putExtra(TimerService.EXTRA_DURATION_MS, durationMs)
@@ -96,10 +101,14 @@ class TimerViewModel @Inject constructor(
         val interval = preferences.value.longBreakInterval
         val (completedSessions, nextPhase) = when {
             state is TimerState.Finished && state.phase == Phase.WORK -> {
+                persistSession(state.phase, completed = true)
                 val sessions = current.completedWorkSessions + 1
                 sessions to nextBreakPhase(sessions, interval)
             }
-            state is TimerState.Finished -> current.completedWorkSessions to Phase.WORK
+            state is TimerState.Finished -> {
+                persistSession(state.phase, completed = true)
+                current.completedWorkSessions to Phase.WORK
+            }
             else -> current.completedWorkSessions to current.nextPhase
         }
         _uiState.value = TimerUiState(
@@ -107,6 +116,20 @@ class TimerViewModel @Inject constructor(
             nextPhase = nextPhase,
             completedWorkSessions = completedSessions,
         )
+    }
+
+    private fun persistSession(phase: Phase, completed: Boolean) {
+        val now = System.currentTimeMillis()
+        viewModelScope.launch {
+            timerRepository.saveSession(
+                PomodoroSession(
+                    phase = phase,
+                    durationMs = preferences.value.durationMs(phase),
+                    startedAt = sessionStartedAt.takeIf { it > 0L } ?: (now - phase.defaultDurationMs),
+                    completedAt = if (completed) now else null,
+                )
+            )
+        }
     }
 
     private fun nextBreakPhase(completedWorkSessions: Int, interval: Int): Phase =
