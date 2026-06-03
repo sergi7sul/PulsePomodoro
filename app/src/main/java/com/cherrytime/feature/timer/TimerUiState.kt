@@ -1,12 +1,14 @@
 package com.cherrytime.feature.timer
 
 import com.cherrytime.domain.model.Phase
+import com.cherrytime.domain.model.Quote
 import com.cherrytime.domain.model.TimerState
 
 data class TimerUiState(
     val timerState: TimerState = TimerState.Idle,
     val nextPhase: Phase = Phase.WORK,
     val completedWorkSessions: Int = 0,
+    val currentQuote: Quote? = null,
 ) {
     val displayProgress: Float
         get() = when (val s = timerState) {

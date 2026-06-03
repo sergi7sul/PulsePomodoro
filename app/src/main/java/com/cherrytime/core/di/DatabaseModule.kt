@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.cherrytime.data.db.CherryTimeDatabase
 import com.cherrytime.data.db.quote.QuoteDao
 import com.cherrytime.data.db.session.SessionDao
+import com.cherrytime.data.repository.QuoteRepositoryImpl
 import com.cherrytime.data.repository.TimerRepositoryImpl
+import com.cherrytime.domain.repository.QuoteRepository
 import com.cherrytime.domain.repository.TimerRepository
 import dagger.Module
 import dagger.Provides
@@ -31,4 +33,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideTimerRepository(impl: TimerRepositoryImpl): TimerRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideQuoteRepository(impl: QuoteRepositoryImpl): QuoteRepository = impl
 }

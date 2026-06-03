@@ -14,6 +14,7 @@ import com.cherrytime.domain.model.Phase
 import com.cherrytime.domain.model.PomodoroSession
 import com.cherrytime.domain.model.TimerState
 import com.cherrytime.domain.repository.TimerRepository
+import com.cherrytime.domain.usecase.GetContextualQuoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,10 +30,12 @@ class TimerViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     preferencesRepository: UserPreferencesRepository,
     private val timerRepository: TimerRepository,
+    private val getContextualQuote: GetContextualQuoteUseCase,
 ) : ViewModel() {
 
     private var serviceBound = false
     private var sessionStartedAt: Long = 0L
+    private var lastQuotePhase: Phase? = null
 
     private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState.asStateFlow()
@@ -115,7 +118,26 @@ class TimerViewModel @Inject constructor(
             timerState = state,
             nextPhase = nextPhase,
             completedWorkSessions = completedSessions,
+            currentQuote = current.currentQuote,
         )
+        fetchQuoteIfNeeded(state)
+    }
+
+    private fun fetchQuoteIfNeeded(state: TimerState) {
+        val phase = (state as? TimerState.Running)?.phase
+        if (phase == null || !phase.isBreak) {
+            if (lastQuotePhase != null) {
+                lastQuotePhase = null
+                _uiState.value = _uiState.value.copy(currentQuote = null)
+            }
+            return
+        }
+        if (phase == lastQuotePhase) return
+        lastQuotePhase = phase
+        viewModelScope.launch {
+            val quote = getContextualQuote(phase)
+            _uiState.value = _uiState.value.copy(currentQuote = quote)
+        }
     }
 
     private fun persistSession(phase: Phase, completed: Boolean) {
