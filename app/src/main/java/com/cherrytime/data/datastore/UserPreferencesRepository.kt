@@ -22,6 +22,10 @@ class UserPreferencesRepository @Inject constructor(
             longBreakInterval = prefs[Keys.LONG_BREAK_INTERVAL] ?: 4,
             soundEnabled = prefs[Keys.SOUND_ENABLED] ?: true,
             vibrationEnabled = prefs[Keys.VIBRATION_ENABLED] ?: true,
+            waterReminderEnabled = prefs[Keys.WATER_REMINDER_ENABLED] ?: true,
+            waterReminderIntervalMin = prefs[Keys.WATER_REMINDER_INTERVAL] ?: 45,
+            postureReminderEnabled = prefs[Keys.POSTURE_REMINDER_ENABLED] ?: true,
+            postureReminderIntervalMin = prefs[Keys.POSTURE_REMINDER_INTERVAL] ?: 60,
         )
     }
 
@@ -43,6 +47,18 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setVibrationEnabled(enabled: Boolean) =
         dataStore.edit { it[Keys.VIBRATION_ENABLED] = enabled }
 
+    suspend fun setWaterReminderEnabled(enabled: Boolean) =
+        dataStore.edit { it[Keys.WATER_REMINDER_ENABLED] = enabled }
+
+    suspend fun setWaterReminderInterval(minutes: Int) =
+        dataStore.edit { it[Keys.WATER_REMINDER_INTERVAL] = minutes.coerceIn(15, 120) }
+
+    suspend fun setPostureReminderEnabled(enabled: Boolean) =
+        dataStore.edit { it[Keys.POSTURE_REMINDER_ENABLED] = enabled }
+
+    suspend fun setPostureReminderInterval(minutes: Int) =
+        dataStore.edit { it[Keys.POSTURE_REMINDER_INTERVAL] = minutes.coerceIn(15, 120) }
+
     private object Keys {
         val WORK_DURATION = intPreferencesKey("work_duration_min")
         val SHORT_BREAK = intPreferencesKey("short_break_min")
@@ -50,5 +66,9 @@ class UserPreferencesRepository @Inject constructor(
         val LONG_BREAK_INTERVAL = intPreferencesKey("long_break_interval")
         val SOUND_ENABLED = booleanPreferencesKey("sound_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
+        val WATER_REMINDER_ENABLED = booleanPreferencesKey("water_reminder_enabled")
+        val WATER_REMINDER_INTERVAL = intPreferencesKey("water_reminder_interval_min")
+        val POSTURE_REMINDER_ENABLED = booleanPreferencesKey("posture_reminder_enabled")
+        val POSTURE_REMINDER_INTERVAL = intPreferencesKey("posture_reminder_interval_min")
     }
 }

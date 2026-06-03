@@ -39,6 +39,10 @@ fun SettingsScreen(
         onLongBreakInterval = viewModel::setLongBreakInterval,
         onSoundEnabled = viewModel::setSoundEnabled,
         onVibrationEnabled = viewModel::setVibrationEnabled,
+        onWaterEnabled = viewModel::setWaterReminderEnabled,
+        onWaterInterval = viewModel::setWaterReminderInterval,
+        onPostureEnabled = viewModel::setPostureReminderEnabled,
+        onPostureInterval = viewModel::setPostureReminderInterval,
     )
 }
 
@@ -51,6 +55,10 @@ private fun SettingsContent(
     onLongBreakInterval: (Int) -> Unit,
     onSoundEnabled: (Boolean) -> Unit,
     onVibrationEnabled: (Boolean) -> Unit,
+    onWaterEnabled: (Boolean) -> Unit = {},
+    onWaterInterval: (Int) -> Unit = {},
+    onPostureEnabled: (Boolean) -> Unit = {},
+    onPostureInterval: (Int) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -113,6 +121,44 @@ private fun SettingsContent(
             checked = prefs.vibrationEnabled,
             onCheckedChange = onVibrationEnabled,
         )
+
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        SectionTitle(stringResource(R.string.settings_reminders))
+
+        Spacer(Modifier.height(4.dp))
+
+        ToggleRow(
+            label = "Water reminder",
+            checked = prefs.waterReminderEnabled,
+            onCheckedChange = onWaterEnabled,
+        )
+        if (prefs.waterReminderEnabled) {
+            DurationSlider(
+                label = "Water interval",
+                value = prefs.waterReminderIntervalMin,
+                range = 15f..120f,
+                unit = "min",
+                onValueChange = onWaterInterval,
+            )
+        }
+
+        ToggleRow(
+            label = "Posture reminder",
+            checked = prefs.postureReminderEnabled,
+            onCheckedChange = onPostureEnabled,
+        )
+        if (prefs.postureReminderEnabled) {
+            DurationSlider(
+                label = "Posture interval",
+                value = prefs.postureReminderIntervalMin,
+                range = 15f..120f,
+                unit = "min",
+                onValueChange = onPostureInterval,
+            )
+        }
     }
 }
 

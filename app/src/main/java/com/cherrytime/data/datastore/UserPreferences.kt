@@ -9,6 +9,10 @@ data class UserPreferences(
     val longBreakInterval: Int = 4,
     val soundEnabled: Boolean = true,
     val vibrationEnabled: Boolean = true,
+    val waterReminderEnabled: Boolean = true,
+    val waterReminderIntervalMin: Int = 45,
+    val postureReminderEnabled: Boolean = true,
+    val postureReminderIntervalMin: Int = 60,
 ) {
     fun durationMs(phase: Phase): Long = when (phase) {
         Phase.WORK -> workDurationMin * 60_000L
