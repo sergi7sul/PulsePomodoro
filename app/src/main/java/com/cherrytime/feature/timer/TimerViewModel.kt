@@ -7,26 +7,37 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cherrytime.data.datastore.UserPreferences
+import com.cherrytime.data.datastore.UserPreferencesRepository
 import com.cherrytime.data.service.TimerService
 import com.cherrytime.domain.model.Phase
 import com.cherrytime.domain.model.TimerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private var serviceBound = false
 
     private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState.asStateFlow()
+
+    val preferences: StateFlow<UserPreferences> = preferencesRepository.preferences.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = UserPreferences(),
+    )
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -54,8 +65,11 @@ class TimerViewModel @Inject constructor(
         val svcIntent = Intent(context, TimerService::class.java)
         when (intent) {
             TimerIntent.Start -> {
+                val phase = _uiState.value.nextPhase
+                val durationMs = preferences.value.durationMs(phase)
                 svcIntent.action = TimerService.ACTION_START
-                svcIntent.putExtra(TimerService.EXTRA_PHASE, _uiState.value.nextPhase.name)
+                svcIntent.putExtra(TimerService.EXTRA_PHASE, phase.name)
+                svcIntent.putExtra(TimerService.EXTRA_DURATION_MS, durationMs)
                 context.startForegroundService(svcIntent)
             }
             TimerIntent.Pause -> {
@@ -79,10 +93,11 @@ class TimerViewModel @Inject constructor(
 
     private fun updateUiState(state: TimerState) {
         val current = _uiState.value
+        val interval = preferences.value.longBreakInterval
         val (completedSessions, nextPhase) = when {
             state is TimerState.Finished && state.phase == Phase.WORK -> {
                 val sessions = current.completedWorkSessions + 1
-                sessions to nextBreakPhase(sessions)
+                sessions to nextBreakPhase(sessions, interval)
             }
             state is TimerState.Finished -> current.completedWorkSessions to Phase.WORK
             else -> current.completedWorkSessions to current.nextPhase
@@ -94,8 +109,8 @@ class TimerViewModel @Inject constructor(
         )
     }
 
-    private fun nextBreakPhase(completedWorkSessions: Int): Phase =
-        if (completedWorkSessions % 4 == 0) Phase.LONG_BREAK else Phase.SHORT_BREAK
+    private fun nextBreakPhase(completedWorkSessions: Int, interval: Int): Phase =
+        if (completedWorkSessions % interval == 0) Phase.LONG_BREAK else Phase.SHORT_BREAK
 
     override fun onCleared() {
         if (serviceBound) context.unbindService(connection)
