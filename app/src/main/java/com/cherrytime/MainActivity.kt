@@ -19,6 +19,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -29,24 +32,37 @@ import com.cherrytime.core.navigation.CherryTimeNavGraph
 import com.cherrytime.core.navigation.Screen
 import com.cherrytime.core.ui.theme.CherryTimeTheme
 import com.cherrytime.data.camera.CameraManager
+import com.cherrytime.data.datastore.UserPreferencesRepository
+import com.cherrytime.feature.onboarding.OnboardingScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var cameraManager: CameraManager
+    @Inject lateinit var preferencesRepository: UserPreferencesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Read onboarding flag synchronously — it's a single fast DataStore read at startup
+        val onboardingDone = runBlocking { preferencesRepository.preferences.first().onboardingCompleted }
+
         setContent {
             CherryTimeTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    CherryTimeApp(cameraManager = cameraManager)
+                    var showApp by remember { mutableStateOf(onboardingDone) }
+                    if (showApp) {
+                        CherryTimeApp(cameraManager = cameraManager)
+                    } else {
+                        OnboardingScreen(onCompleted = { showApp = true })
+                    }
                 }
             }
         }
