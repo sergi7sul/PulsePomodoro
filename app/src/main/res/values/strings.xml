@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CherryTime</string>
+
+    <!-- Timer screen -->
+    <string name="phase_work">Focus</string>
+    <string name="phase_short_break">Short Break</string>
+    <string name="phase_long_break">Long Break</string>
+    <string name="btn_start">Start</string>
+    <string name="btn_pause">Pause</string>
+    <string name="btn_skip">Skip</string>
+    <string name="btn_reset">Reset</string>
+
+    <!-- Water tracking -->
+    <string name="water_log_added">+250 ml logged</string>
+    <string name="water_daily_total">%d ml today</string>
+
+    <!-- Navigation -->
+    <string name="nav_timer">Timer</string>
+    <string name="nav_break">Break</string>
+    <string name="nav_analytics">Analytics</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_timer">Timer</string>
+    <string name="notification_channel_break">Break Alerts</string>
+    <string name="notification_channel_reminders">Wellness Reminders</string>
+    <string name="notification_timer_title">CherryTime</string>
+    <string name="notification_break_title">Time for a break!</string>
+    <string name="notification_water_title">Hydration reminder</string>
+    <string name="notification_water_text">Don\'t forget to drink water.</string>
+    <string name="notification_posture_title">Posture check</string>
+    <string name="notification_posture_text">Sit up straight and take a deep breath.</string>
+
+    <!-- Permissions -->
+    <string name="permission_camera_rationale">Camera access enables real-time pose feedback during active breaks. All processing happens on-device — no data leaves your phone.</string>
+
+    <!-- Analytics -->
+    <string name="analytics_title">Your Progress</string>
+    <string name="analytics_empty">Complete your first session to see stats.</string>
+    <string name="analytics_focus_blocks">Focus Blocks</string>
+    <string name="analytics_break_compliance">Break Compliance</string>
+    <string name="analytics_water_intake">Water Intake</string>
+    <string name="analytics_calories">Calories Burned</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_work_duration">Work duration</string>
+    <string name="settings_short_break_duration">Short break</string>
+    <string name="settings_long_break_duration">Long break</string>
+    <string name="settings_pomodoros_before_long">Pomodoros before long break</string>
+    <string name="settings_water_goal">Daily water goal</string>
+    <string name="settings_body_weight">Body weight (kg)</string>
+    <string name="settings_camera_feedback">Pose feedback (camera)</string>
+    <string name="settings_reminders">Wellness reminders</string>
+    <string name="settings_gemini_key">Gemini API key (optional)</string>
+    <string name="settings_gemini_key_hint">Paste your key from aistudio.google.com</string>
+</resources>
