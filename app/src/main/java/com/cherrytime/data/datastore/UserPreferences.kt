@@ -13,6 +13,7 @@ data class UserPreferences(
     val waterReminderIntervalMin: Int = 45,
     val postureReminderEnabled: Boolean = true,
     val postureReminderIntervalMin: Int = 60,
+    val onboardingCompleted: Boolean = false,
 ) {
     fun durationMs(phase: Phase): Long = when (phase) {
         Phase.WORK -> workDurationMin * 60_000L

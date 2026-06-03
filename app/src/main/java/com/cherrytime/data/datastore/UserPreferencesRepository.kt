@@ -26,6 +26,7 @@ class UserPreferencesRepository @Inject constructor(
             waterReminderIntervalMin = prefs[Keys.WATER_REMINDER_INTERVAL] ?: 45,
             postureReminderEnabled = prefs[Keys.POSTURE_REMINDER_ENABLED] ?: true,
             postureReminderIntervalMin = prefs[Keys.POSTURE_REMINDER_INTERVAL] ?: 60,
+            onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false,
         )
     }
 
@@ -59,6 +60,9 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setPostureReminderInterval(minutes: Int) =
         dataStore.edit { it[Keys.POSTURE_REMINDER_INTERVAL] = minutes.coerceIn(15, 120) }
 
+    suspend fun setOnboardingCompleted() =
+        dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = true }
+
     private object Keys {
         val WORK_DURATION = intPreferencesKey("work_duration_min")
         val SHORT_BREAK = intPreferencesKey("short_break_min")
@@ -70,5 +74,6 @@ class UserPreferencesRepository @Inject constructor(
         val WATER_REMINDER_INTERVAL = intPreferencesKey("water_reminder_interval_min")
         val POSTURE_REMINDER_ENABLED = booleanPreferencesKey("posture_reminder_enabled")
         val POSTURE_REMINDER_INTERVAL = intPreferencesKey("posture_reminder_interval_min")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 }
