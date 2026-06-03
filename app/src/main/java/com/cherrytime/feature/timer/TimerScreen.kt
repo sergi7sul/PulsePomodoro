@@ -37,16 +37,18 @@ import com.cherrytime.domain.model.TimerState
 
 @Composable
 fun TimerScreen(
+    onStartActiveBreak: () -> Unit = {},
     viewModel: TimerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    TimerContent(uiState = uiState, onIntent = viewModel::onIntent)
+    TimerContent(uiState = uiState, onIntent = viewModel::onIntent, onStartActiveBreak = onStartActiveBreak)
 }
 
 @Composable
 private fun TimerContent(
     uiState: TimerUiState,
     onIntent: (TimerIntent) -> Unit,
+    onStartActiveBreak: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -79,7 +81,12 @@ private fun TimerContent(
 
         Spacer(Modifier.height(if (uiState.currentPhase.isBreak) 16.dp else 40.dp))
 
-        TimerControls(timerState = uiState.timerState, nextPhase = uiState.nextPhase, onIntent = onIntent)
+        TimerControls(
+            timerState = uiState.timerState,
+            nextPhase = uiState.nextPhase,
+            onIntent = onIntent,
+            onStartActiveBreak = onStartActiveBreak,
+        )
     }
 }
 
@@ -190,6 +197,7 @@ private fun TimerControls(
     timerState: TimerState,
     nextPhase: Phase,
     onIntent: (TimerIntent) -> Unit,
+    onStartActiveBreak: () -> Unit = {},
 ) {
     when (timerState) {
         is TimerState.Idle -> {
@@ -199,12 +207,20 @@ private fun TimerControls(
         }
 
         is TimerState.Running -> {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                FilledTonalButton(onClick = { onIntent(TimerIntent.Pause) }) {
-                    Text("Pause")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    FilledTonalButton(onClick = { onIntent(TimerIntent.Pause) }) {
+                        Text("Pause")
+                    }
+                    OutlinedButton(onClick = { onIntent(TimerIntent.Skip) }) {
+                        Text("Skip")
+                    }
                 }
-                OutlinedButton(onClick = { onIntent(TimerIntent.Skip) }) {
-                    Text("Skip")
+                if (timerState.phase.isBreak) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(onClick = onStartActiveBreak) {
+                        Text("Active Break")
+                    }
                 }
             }
         }
