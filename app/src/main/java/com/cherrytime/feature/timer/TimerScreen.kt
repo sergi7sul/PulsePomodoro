@@ -70,7 +70,14 @@ private fun TimerContent(
 
         SessionDots(sessionsInCycle = uiState.sessionsInCycle)
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(24.dp))
+
+        MotivationCard(
+            quote = uiState.currentQuote,
+            visible = uiState.currentPhase.isBreak,
+        )
+
+        Spacer(Modifier.height(if (uiState.currentPhase.isBreak) 16.dp else 40.dp))
 
         TimerControls(timerState = uiState.timerState, nextPhase = uiState.nextPhase, onIntent = onIntent)
     }
