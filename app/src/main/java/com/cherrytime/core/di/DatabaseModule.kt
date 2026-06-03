@@ -29,6 +29,7 @@ object DatabaseModule {
 
     @Provides fun provideSessionDao(db: CherryTimeDatabase): SessionDao = db.sessionDao()
     @Provides fun provideQuoteDao(db: CherryTimeDatabase): QuoteDao = db.quoteDao()
+    @Provides fun provideStretchDao(db: CherryTimeDatabase) = db.stretchExerciseDao()
 
     @Provides
     @Singleton
